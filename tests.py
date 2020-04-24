@@ -1,10 +1,5 @@
-s = """
-        self.album = "" ;self.albumartist = "" ;self.artist = "" ;self.artwork = "" ;self.comment = "" ;self.compilation = "";
-        self.composer = "" ;self.discnumber = "" ;self.genre = "" ;self.lyrics = "" ;self.totaldiscs = "" ;self.totaltracks = "";
-        self.tracknumber = "" ;self.tracktitle = "" ;self.year = "";
-        """.strip().split(";")
+import sys, os, re, shutil, distutils
 
+x = os.listdir("/ayieko/Music//Gizmo Album")
 
-for cmd in s:
-        base = cmd.split("=")[0]
-        print(base.strip())
+print(*x, sep="\n")

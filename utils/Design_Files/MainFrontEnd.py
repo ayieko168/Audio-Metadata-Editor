@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:/Users/ayieko/Projects And  Research/PycharmProjects/Audio-Metadata-Editor/utils/Design_Files/MainFrontEnd.ui'
+# Form implementation generated from reading ui file '/ayieko/Projects And Research/Python Projects/Audio-Metadata-Editor/utils/Design_Files/MainFrontEnd.ui'
 #
-# Created by: PyQt5 UI code generator 5.12.1
+# Created by: PyQt5 UI code generator 5.14.2
 #
 # WARNING! All changes made in this file will be lost!
+
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -12,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(891, 615)
+        MainWindow.resize(891, 701)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
@@ -250,9 +251,11 @@ class Ui_MainWindow(object):
         font.setUnderline(False)
         self.groupBox.setFont(font)
         self.groupBox.setObjectName("groupBox")
-        self.artGraphicsViewSingle = QtWidgets.QGraphicsView(self.groupBox)
-        self.artGraphicsViewSingle.setGeometry(QtCore.QRect(10, 20, 200, 200))
-        self.artGraphicsViewSingle.setObjectName("artGraphicsViewSingle")
+        self.artLabelSingle = QtWidgets.QLabel(self.groupBox)
+        self.artLabelSingle.setGeometry(QtCore.QRect(10, 20, 200, 200))
+        self.artLabelSingle.setFrameShape(QtWidgets.QFrame.Box)
+        self.artLabelSingle.setText("")
+        self.artLabelSingle.setObjectName("artLabelSingle")
         self.horizontalLayout_4.addWidget(self.groupBox)
         self.findArtButtonSingle = QtWidgets.QPushButton(self.tab)
         self.findArtButtonSingle.setMinimumSize(QtCore.QSize(131, 0))
@@ -590,16 +593,18 @@ class Ui_MainWindow(object):
         font.setUnderline(False)
         self.groupBox_2.setFont(font)
         self.groupBox_2.setObjectName("groupBox_2")
-        self.artGraphicsViewAlbum = QtWidgets.QGraphicsView(self.groupBox_2)
-        self.artGraphicsViewAlbum.setGeometry(QtCore.QRect(10, 20, 200, 200))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.artGraphicsViewAlbum.sizePolicy().hasHeightForWidth())
-        self.artGraphicsViewAlbum.setSizePolicy(sizePolicy)
-        self.artGraphicsViewAlbum.setObjectName("artGraphicsViewAlbum")
+        self.artLabelAlbum = QtWidgets.QLabel(self.groupBox_2)
+        self.artLabelAlbum.setGeometry(QtCore.QRect(20, 20, 200, 200))
+        self.artLabelAlbum.setFrameShape(QtWidgets.QFrame.Box)
+        self.artLabelAlbum.setText("")
+        self.artLabelAlbum.setObjectName("artLabelAlbum")
         self.gridLayout_3.addWidget(self.groupBox_2, 16, 2, 8, 2)
         self.tableWidgetAlbum = QtWidgets.QTableWidget(self.tab_2)
+        font = QtGui.QFont()
+        font.setFamily("Courier 10 Pitch")
+        font.setPointSize(11)
+        font.setUnderline(False)
+        self.tableWidgetAlbum.setFont(font)
         self.tableWidgetAlbum.setAcceptDrops(True)
         self.tableWidgetAlbum.setDragDropMode(QtWidgets.QAbstractItemView.DropOnly)
         self.tableWidgetAlbum.setDefaultDropAction(QtCore.Qt.LinkAction)
@@ -616,10 +621,12 @@ class Ui_MainWindow(object):
         self.tableWidgetAlbum.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidgetAlbum.setHorizontalHeaderItem(1, item)
-        self.tableWidgetAlbum.horizontalHeader().setDefaultSectionSize(100)
+        self.tableWidgetAlbum.horizontalHeader().setCascadingSectionResizes(True)
+        self.tableWidgetAlbum.horizontalHeader().setDefaultSectionSize(234)
         self.tableWidgetAlbum.horizontalHeader().setHighlightSections(False)
+        self.tableWidgetAlbum.horizontalHeader().setMinimumSectionSize(50)
         self.tableWidgetAlbum.horizontalHeader().setSortIndicatorShown(True)
-        self.tableWidgetAlbum.verticalHeader().setDefaultSectionSize(24)
+        self.tableWidgetAlbum.verticalHeader().setDefaultSectionSize(27)
         self.gridLayout_3.addWidget(self.tableWidgetAlbum, 0, 2, 10, 3)
         self.compilationEntryAlbum = QtWidgets.QLineEdit(self.tab_2)
         self.compilationEntryAlbum.setMinimumSize(QtCore.QSize(371, 0))
@@ -664,7 +671,7 @@ class Ui_MainWindow(object):
         self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 891, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 891, 25))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
@@ -681,7 +688,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuFile.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -700,7 +707,8 @@ class Ui_MainWindow(object):
         self.label_11.setText(_translate("MainWindow", "of"))
         self.label_13.setText(_translate("MainWindow", "Disc Number: "))
         self.label_12.setText(_translate("MainWindow", "of"))
-        self.groupBox.setTitle(_translate("MainWindow", "Album Art:"))
+        self.groupBox.setTitle(_translate("MainWindow", "Song Art:"))
+        self.artLabelSingle.setToolTip(_translate("MainWindow", "No image..."))
         self.findArtButtonSingle.setText(_translate("MainWindow", "Find New"))
         self.label_14.setText(_translate("MainWindow", "Path:"))
         self.openButtonSingle.setText(_translate("MainWindow", "Open"))
@@ -709,6 +717,8 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Edit Single File MetaData"))
         self.exitButtonAlbum.setText(_translate("MainWindow", "Exit"))
         self.findArtButtonAlbum.setText(_translate("MainWindow", "Find Art"))
+        self.destntryAlbum.setToolTip(_translate("MainWindow", "This Destination Is only used when <Save Album> is called"))
+        self.destntryAlbum.setPlaceholderText(_translate("MainWindow", "Destination Path For Your Album"))
         self.label_26.setText(_translate("MainWindow", "Disc Number: "))
         self.label_27.setText(_translate("MainWindow", "of"))
         self.label_15.setText(_translate("MainWindow", "Title:"))
@@ -727,6 +737,7 @@ class Ui_MainWindow(object):
         self.removeAllAlbum.setText(_translate("MainWindow", "Remove All"))
         self.label_20.setText(_translate("MainWindow", "Composer: "))
         self.groupBox_2.setTitle(_translate("MainWindow", "Album Art:"))
+        self.artLabelAlbum.setToolTip(_translate("MainWindow", "No Image"))
         self.tableWidgetAlbum.setSortingEnabled(True)
         item = self.tableWidgetAlbum.horizontalHeaderItem(0)
         item.setText(_translate("MainWindow", "Name"))
@@ -739,5 +750,3 @@ class Ui_MainWindow(object):
         self.actionOpen.setText(_translate("MainWindow", "Open"))
         self.actionSave.setText(_translate("MainWindow", "Save"))
         self.actionSave_As.setText(_translate("MainWindow", "Save As"))
-
-
