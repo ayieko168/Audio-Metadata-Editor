@@ -31,12 +31,12 @@ Bellow is a list of python packages needed for the running of the software:
  ![MAinWindow Single](/Sreenshots/CreateAlbum-Example.JPG)
 
 # FUNCTIONALITY
- - [ ] Edit audio metadata
+ - [x] Edit audio metadata
   - edit Single files
   - edit Multiple files
   - edit metadata such as Album-Name, Artists, Album-Art
- - [ ] Save files to an album
- - [ ] Download audio files from the internet
+ - [x] Save files to an album
+ - [x] Download audio files from the internet
   - Download Playlists
   - Download from multiple websites
   - Embed and download video thumbnails
