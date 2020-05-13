@@ -2,8 +2,195 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QPixmap
 from utils.Design_Files.MainFrontEnd import *
+from utils.Design_Files import download_dialog
 import music_tag
 import os, sys, time, shutil, re
+import threading, webbrowser, zipfile, shutil
+
+
+class DownloadWidget(QDialog):
+
+    def __init__(self, parent):
+
+        super().__init__(parent=parent)
+        self.downloadUI = download_dialog.Ui_downloadForm()
+        self.downloadUI.setupUi(self)
+
+        ## variables
+        self.default_options = ["--newline", "--extract-audio", "--abort-on-error", "--verbose"]  # Removed "--ignore-errors", "--rm-cache-dir"
+        self.download_options = []
+        # Save all downloads under Music directory in your home directory
+        if (sys.platform == "win32") or (sys.platform == "cygwin"):
+            self.destination_path = f"C:\\Users\\{os.getlogin()}\\Music"
+            self.output_format = f"-o \"{self.destination_path}\\%(title)s.%(ext)s\""
+        elif sys.platform == "linux":
+            self.destination_path = "~/Music"
+            self.output_format = f"-o \"{self.destination_path}/%(title)s.%(ext)s\""
+
+        ## Setups
+        self.downloadUI.textBrowser.setOpenExternalLinks(True)
+        self.cursor = self.downloadUI.loggingTextEdit.textCursor()
+        # QProcess object for external app
+        self.process = QProcess(self)
+        # QProcess emits `readyRead` when there is data to be read
+        self.process.readyRead.connect(self.dataReady)
+        self.process.finished.connect(self.finisedProcess)
+
+
+        ## Connections
+        self.downloadUI.downloadButton.clicked.connect(self.downloadAudio)
+        self.downloadUI.viewLogsButton.clicked.connect(self.viewLogs)
+        self.downloadUI.seeAvailFormatsButton.clicked.connect(self.seeAvailFormats)
+        self.downloadUI.setDestButton.clicked.connect(self.findDestination)
+        self.downloadUI.stopButton.clicked.connect(self.stopExecution)
+
+        ## PLartform specific variables
+        if sys.platform == "win32":
+            self.yt_dl = "utils\\yt_dl-exes\\youtube-dl.exe"
+        else:
+            self.yt_dl = "youtube-dl"
+
+        ## Check if the youtube downloader files are there
+        x = os.system(f"{self.yt_dl} --version")
+        if x == 1:
+            parent_path = os.getcwd()
+            git_link = "https://github.com/ayieko168/Audio-Metadata-Editor/tree/master/utils/Design_Files"
+            QMessageBox.critical(self,
+                                 "ERROR!!!",
+                                 f"""There seems to be a problem with the downloader files. Try Fixing By:
+                                    1.) On the program, Going to  'File -> Audio Downloader' and Click the 'Initialize Downloader Files' Options.
+                                    2.) If (1) does not work, visit this link '{git_link}' and download the zip file and extract it on here {parent_path}.
+                                    3.) If all these don't work, visit the main program's download site and download it once again, Sorry!
+                                 """,
+                                 QMessageBox.Ok
+                                 )
+
+    def stopExecution(self):
+
+        self.process.kill()
+        self.downloadUI.downloadButton.setEnabled(True)
+        self.downloadUI.seeAvailFormatsButton.setEnabled(True)
+        self.downloadUI.loggingTextEdit.insertPlainText(f"[Application] Process Killed Successfully\n")
+
+    def findDestination(self):
+
+        self.destination_path = QFileDialog.getExistingDirectory()
+
+        if (sys.platform == "win32") or (sys.platform == "cygwin"):
+            self.output_format = f"-o \"{self.destination_path}\\%(title)s.%(ext)s\""
+        elif sys.platform == "linux":
+            self.output_format = f"-o \"{self.destination_path}/%(title)s.%(ext)s\""
+
+        self.downloadUI.loggingTextEdit.insertPlainText(f"[Application] Destination directory set to :: {self.destination_path}")
+
+    def seeAvailFormats(self):
+
+        ## Get the current url
+        self.url = self.downloadUI.urlEntry.text()
+
+        ## Verify the url - Exit if any of these are TRUE
+        if (self.url == "") and (not self.url.startswith("http")):
+            return
+
+        ## Run the command
+        command = f"{self.yt_dl} -F \"{self.url}\""
+        self.downloadUI.loggingTextEdit.moveCursor(QtGui.QTextCursor.End)
+        self.downloadUI.loggingTextEdit.insertPlainText("[Application] Started Formats Aquisition Process...\n")
+        self.process.start(command)
+        self.downloadUI.downloadButton.setEnabled(False)
+        self.downloadUI.seeAvailFormatsButton.setEnabled(False)
+
+    def downloadAudio(self):
+
+        ## Reset the options list
+        self.download_options = []
+
+        ## Get the current url
+        self.url = self.downloadUI.urlEntry.text()
+
+        ## Verify the url - Exit if any of these are TRUE
+        if (self.url == "") and (not self.url.startswith("http")):
+            return
+
+        ## Get current download options
+        # get the audio type combo box option
+        self.audio_typeOP = self.downloadUI.typeComboBox.currentText()
+        self.download_options.append(f"--audio-format {self.audio_typeOP.lower()}")
+        # get the check-box options
+        if self.downloadUI.playlistCheck.isChecked():
+            self.download_options.append("--yes-playlist")
+            # Change the output format to satisfy playlist format
+            if (sys.platform == "win32") or (sys.platform == "cygwin"):
+                self.output_format = f"-o \"{self.destination_path}\\%(playlist)s\\%(playlist_index)s - %(title)s.%(ext)s\""  # Save all videos under Music directory in your home directory
+            elif sys.platform == "linux":
+                self.output_format = f"-o \"{self.destination_path}/%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s\""
+        else:
+            self.download_options.append("--no-playlist")
+        if self.downloadUI.getThumbCheck.isChecked():
+            self.download_options.append("--write-thumbnail")
+        if self.downloadUI.embedThumbCheck.isChecked():
+            self.download_options.append("--embed-thumbnail")
+        if self.downloadUI.geoBypassCheck.isChecked():
+            self.download_options.append("--geo-bypass")
+        if self.downloadUI.getDescriptionCheck.isChecked():
+            self.download_options.append("--write-description")
+        if self.downloadUI.writeMetaCheck.isChecked():
+            self.download_options.append("--add-metadata")
+
+        ## Create the command string
+        command = f"{self.yt_dl} {' '.join(self.default_options)} {' '.join(self.download_options)} {self.output_format} \"{self.url}\""
+        self.downloadUI.loggingTextEdit.moveCursor(QtGui.QTextCursor.End)
+        self.downloadUI.loggingTextEdit.insertPlainText(f"[Application] Options Selected For Downloading are :: {self.download_options}\n")
+        self.downloadUI.loggingTextEdit.insertPlainText(f"[Application] The Destination Path is Set to :: {self.output_format}\n")
+        self.downloadUI.loggingTextEdit.insertPlainText(f"[Application] The Command to be run is :: {command}\n")
+
+        ## Run the command
+        self.downloadUI.loggingTextEdit.moveCursor(QtGui.QTextCursor.End)
+        self.downloadUI.loggingTextEdit.insertPlainText("[Application] Started Download Process...\n")
+        self.process.start(command)
+
+        self.downloadUI.downloadButton.setEnabled(False)
+        self.downloadUI.stopButton.setEnabled(True)
+
+    def viewLogs(self):
+
+        log_file_path = os.path.join(os.getcwd(), "logging.md")
+
+        ## Show th Widget For Logging text
+        if self.downloadUI.viewLogsButton.isChecked():
+            self.setMaximumHeight(600)
+            self.setMinimumHeight(600)
+        else:
+            self.setMinimumHeight(200)
+            self.setMaximumHeight(200)
+
+    def show_dialog(self):
+        """Opens A Dialog For Downloading Audio Files"""
+
+        self.show()
+        self.exec_()
+
+    def dataReady(self):
+
+        string = str(self.process.readAll(), encoding="utf-8")
+        time_now = time.time()
+
+        ## Log out to the logging file
+        with open("logging.md", "a") as logFO:
+            logFO.write(f">> [{time_now}] :: {string} ")
+
+        ## Send the log to the logging text widget
+        self.downloadUI.loggingTextEdit.moveCursor(QtGui.QTextCursor.End)
+        self.downloadUI.loggingTextEdit.insertPlainText(string)
+
+    def finisedProcess(self):
+
+        self.downloadUI.downloadButton.setEnabled(True)
+        self.downloadUI.seeAvailFormatsButton.setEnabled(True)
+        self.downloadUI.stopButton.setEnabled(False)
+        self.downloadUI.loggingTextEdit.moveCursor(QtGui.QTextCursor.End)
+        self.downloadUI.loggingTextEdit.insertPlainText("[Application] Download Finished Successfully\n")
+
 
 class Application(QMainWindow):
 
@@ -26,6 +213,9 @@ class Application(QMainWindow):
         self.MainUi.tableWidgetAlbum.currentItemChanged.connect(self.updateDataAlbumCMD)
         self.MainUi.saveButtonSingle.clicked.connect(self.saveSingleCMD)
         self.MainUi.findArtButtonSingle.clicked.connect(self.findArtSingleCMD)
+
+        ## MENUBAR CONNECTIONS
+        self.MainUi.menuFile.triggered[QAction].connect(self.menuFileCMD)
 
         ## CONSTANTS
         self.FILE_FILTERS = """ Audio Files (*.aac *.aiff *.dsf *.flac *.m4a *.mp3 *.ogg *.opus *.wav *.wv);;
@@ -56,11 +246,13 @@ class Application(QMainWindow):
 
         ## Plartform Specific Setup
         if (sys.platform == "win32") or (sys.platform == "cygwin"):
-            self.defaultMusicPath = f"C:\\Users\\{os.getlogin()}\\Music\\Music\\albums"
+            self.defaultMusicPath = f"C:\\Users\\{os.getlogin()}\\Music"
             self.defaultPicturesPath = f"C:\\Users\\{os.getlogin()}\\Pictures"
+            self.youtube_path = "utils\\yt_dl-exes\\youtube-dl.exe"
         elif sys.platform == "linux":
             self.defaultMusicPath = f"/{os.getlogin()}/Music"
             self.defaultPicturesPath = f"/{os.getlogin()}/Pictures"
+            self.youtube_path = "utils/yt_dl-exes/youtube-dl.exe"
 
     def updateAlbumMetas(self):
 
@@ -71,7 +263,7 @@ class Application(QMainWindow):
                 curent_music_path = self.MainUi.tableWidgetAlbum.item(self.MainUi.tableWidgetAlbum.currentRow(), 1).text()
                 curent_music_name = os.path.basename(curent_music_path)
                 current_music_meta_object = self.metadata_dictinary[curent_music_name]
-                print(f"Editing Values of {curent_music_name}, Self Value = {self.totaltracks}, meta Value = {current_music_meta_object['totaltracks']}")
+                # print(f"Editing Values of {curent_music_name}, Self Value = {self.totaltracks}, meta Value = {current_music_meta_object['totaltracks']}")
                 self.writeMusicInfo(current_music_meta_object)
 
     def openButtonSingleCMD(self):
@@ -516,7 +708,8 @@ class Application(QMainWindow):
         ## Save Cahnged File names to disk and change the list values with the current ones
         if not musicNameList == edited_musicNames:
             print("A Name changed")
-            msg = QMessageBox.question(self, "QUESTION",
+            QMessageBox.question()
+            msg = QMessageBox.question("QUESTION",
                                        "I seams you have renamed some file names, do you want to rename the file?",
                                        " More Info title", "More Info Data",
                                        QMessageBox.Yes | QMessageBox.No)
@@ -672,6 +865,55 @@ class Application(QMainWindow):
         """Remove the temporarily created art image"""
 
         os.remove("test_img.jpg")
+
+    def menuFileCMD(self, q):
+        selection = q.text()
+        print("You have selected .. ", selection)
+
+        if selection == "Download File":
+            download_obj = DownloadWidget(self)
+            download_obj.show_dialog()
+
+        elif selection == "Update Downloader":
+
+            if (sys.platform == "win32") or (sys.platform == "cygwin"):
+                th1 = threading.Thread(target=lambda: os.system(f"{self.youtube_path} -U && pause"))
+                th1.daemon
+                th1.start()
+            elif sys.platform == "linux":
+                th1 = threading.Thread(target=lambda: os.system(f"youtube-dl -U && pause"))
+                th1.daemon
+                th1.start()
+
+        elif selection == "Check Out A Real Downloader":
+            """Open my youtube downloader github page"""
+            webbrowser.open_new_tab("https://github.com/ayieko168/New-YouTube-Downloader")
+
+        elif selection == "Initialize Downloader Files":
+
+            ## Ask if you really want to initialize it
+
+            ## Extract the file
+            shutil.unpack_archive("utils/yt_dl-exes.tar.xz", "utils/yt_dl-exes")
+            print("Done unpacking")
+
+        elif selection == "Reset everything":
+
+            msg = QMessageBox.question(self, "QUESTION", "ARE YOU SURE YOU WANT TO RESET EVERY THING?", QMessageBox.Yes | QMessageBox.No)
+
+            if msg == 16384:
+                ## Remove The yt-exes file
+                try: shutil.rmtree("utils/yt_dl-exes")
+                except: pass
+                ## Reset the logging file
+                fo = open("logging.md", "w")
+                fo.write("")
+                fo.close()
+            elif msg == 65536:
+                pass
+
+
+
 
 
 if __name__ == "__main__":

@@ -1,5 +1,3 @@
-import sys, os, re, shutil, distutils
+import os
 
-x = os.listdir("/ayieko/Music//Gizmo Album")
-
-print(*x, sep="\n")
+print()

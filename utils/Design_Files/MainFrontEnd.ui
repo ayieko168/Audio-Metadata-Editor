@@ -1515,16 +1515,39 @@
      <x>0</x>
      <y>0</y>
      <width>891</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
+    <widget class="QMenu" name="menuDownload_Audio">
+     <property name="title">
+      <string>Audio Downloader</string>
+     </property>
+     <addaction name="actionDownload_File_2"/>
+     <addaction name="actionUpdate_Downloader"/>
+     <addaction name="actionCheck_Out_A_Real_Downloader"/>
+     <addaction name="separator"/>
+     <addaction name="actionInitialize_Downloader"/>
+     <addaction name="actionUpdate_Downloader_Tools"/>
+     <addaction name="separator"/>
+    </widget>
+    <widget class="QMenu" name="menuReset">
+     <property name="title">
+      <string>Reset</string>
+     </property>
+     <addaction name="actionReset_everything"/>
+    </widget>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
+    <addaction name="separator"/>
+    <addaction name="menuDownload_Audio"/>
+    <addaction name="separator"/>
+    <addaction name="menuReset"/>
+    <addaction name="actionExit"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -1541,6 +1564,49 @@
   <action name="actionSave_As">
    <property name="text">
     <string>Save As</string>
+   </property>
+  </action>
+  <action name="actionDownload_File">
+   <property name="text">
+    <string>Download File</string>
+   </property>
+  </action>
+  <action name="actionDownload_File_2">
+   <property name="text">
+    <string>Download File</string>
+   </property>
+  </action>
+  <action name="actionUpdate_Downloader">
+   <property name="text">
+    <string>Update Downloader</string>
+   </property>
+  </action>
+  <action name="actionCheck_Out_A_Real_Downloader">
+   <property name="text">
+    <string>Check Out A Real Downloader</string>
+   </property>
+  </action>
+  <action name="actionInitialize_Downloader">
+   <property name="text">
+    <string>Initialize Downloader Files</string>
+   </property>
+   <property name="whatsThis">
+    <string>Only run once after downloading the program</string>
+   </property>
+  </action>
+  <action name="actionReset_everything">
+   <property name="text">
+    <string>Reset everything</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionUpdate_Downloader_Tools">
+   <property name="text">
+    <string>Update Downloader Tools</string>
    </property>
   </action>
  </widget>
